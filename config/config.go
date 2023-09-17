@@ -28,6 +28,9 @@ type CacheConfig struct {
 	// CacheSize maximal items in primary cache (only works in MEMORY storage)
 	CacheSize int
 
+	// InstanceId instance id for distinguishing different cache space
+	InstanceId string
+
 	// DebugMode indicate if we're in debug mode (will print access log)
 	DebugMode bool
 

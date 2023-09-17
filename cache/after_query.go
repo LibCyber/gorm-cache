@@ -4,10 +4,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"reflect"
 	"sync"
 
-	"github.com/Pacific73/gorm-cache/config"
-	"github.com/Pacific73/gorm-cache/util"
+	"github.com/LibCyber/gorm-cache/config"
+	"github.com/LibCyber/gorm-cache/util"
 	"gorm.io/gorm"
 )
 
@@ -27,6 +28,16 @@ func AfterQuery(cache *Gorm2Cache) func(db *gorm.DB) {
 
 		if util.ShouldCache(tableName, cache.Config.Tables) {
 			if db.Error == nil {
+				destValue := reflect.Indirect(reflect.ValueOf(db.Statement.Dest))
+				// 如果是结构体应该能提主键出来
+				// 如果是数组需要判断内部元素是不是结构体，不是结构体的都提不了主键
+				if destValue.Kind() == reflect.Slice || destValue.Kind() == reflect.Array {
+					if (destValue.Type().Elem().Kind() == reflect.Pointer && destValue.Type().Elem().Elem().Kind() != reflect.Struct) ||
+						(destValue.Type().Elem().Kind() != reflect.Pointer && destValue.Type().Elem().Kind() != reflect.Struct) {
+						return
+					}
+				}
+
 				// error is nil -> cache not hit, we cache newly retrieved data
 				primaryKeys, objects := getObjectsAfterLoad(db)
 

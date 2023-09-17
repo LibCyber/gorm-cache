@@ -4,9 +4,9 @@ import (
 	"context"
 	"sync/atomic"
 
-	"github.com/Pacific73/gorm-cache/config"
-	"github.com/Pacific73/gorm-cache/data_layer"
-	"github.com/Pacific73/gorm-cache/util"
+	"github.com/LibCyber/gorm-cache/config"
+	"github.com/LibCyber/gorm-cache/data_layer"
+	"github.com/LibCyber/gorm-cache/util"
 	"gorm.io/gorm"
 )
 
@@ -68,7 +68,11 @@ func (c *Gorm2Cache) Init() error {
 		}
 		c.Config.RedisConfig.InitClient()
 	}
-	c.InstanceId = util.GenInstanceId()
+	if c.Config.InstanceId == "" {
+		c.InstanceId = util.GenInstanceId()
+	} else {
+		c.InstanceId = c.Config.InstanceId
+	}
 
 	prefix := util.GormCachePrefix + ":" + c.InstanceId
 
